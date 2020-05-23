@@ -138,7 +138,7 @@ void WLED::setup()
       ledCount = MAX_LEDS_DMA;        // DMA method uses too much ram
   #endif
 #endif
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.setTimeout(50);
   DEBUG_PRINTLN();
   DEBUG_PRINT("---WLED ");
