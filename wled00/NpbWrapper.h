@@ -6,6 +6,7 @@
 #ifndef LEDPIN
 #define LEDPIN 2  //strip pin. Any for ESP32, gpio2 or 3 is recommended for ESP8266 (gpio2/3 are labeled D4/RX on NodeMCU and Wemos)
 #endif
+#define USE_SERIAL
 //#define USE_APA102  // Uncomment for using APA102 LEDs.
 //#define USE_WS2801  // Uncomment for using WS2801 LEDs (make sure you have NeoPixelBus v2.5.6 or newer)
 //#define USE_LPD8806 // Uncomment for using LPD8806
@@ -84,7 +85,9 @@
 
 //automatically uses the right driver method for each platform
 #ifdef ARDUINO_ARCH_ESP32
- #ifdef USE_APA102
+ #ifdef USE_SERIAL
+  #define PIXELMETHOD RgbSerialMethod
+ #elif USE_APA102
   #define PIXELMETHOD DotStarMethod
  #elif defined(USE_WS2801)
   #define PIXELMETHOD NeoWs2801Method
@@ -126,7 +129,7 @@
  #define PIXELFEATURE4 DotStarLbgrFeature
 #elif defined(USE_LPD8806)
  #define PIXELFEATURE3 Lpd8806GrbFeature 
-#elif defined(USE_WS2801)
+#elif defined(USE_WS2801) || defined(USE_SERIAL)
  #define PIXELFEATURE3 NeoRbgFeature
  #define PIXELFEATURE4 NeoRbgFeature
 #elif defined(USE_TM1814)
@@ -140,8 +143,8 @@
  #define PIXELFEATURE4 NeoGrbwFeature
 #endif
 
-
 #include <NeoPixelBrightnessBus.h>
+#include "RgbSerialMethod.h"
 
 enum NeoPixelType
 {
@@ -176,7 +179,9 @@ public:
     switch (_type)
     {
       case NeoPixelType_Grb:
-      #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
+      #if defined(USE_SERIAL)
+        _pGrb = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD>(countPixels);
+      #elif defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
         _pGrb = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD>(countPixels, CLKPIN, DATAPIN);
       #else
         _pGrb = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD>(countPixels, LEDPIN);
@@ -185,7 +190,9 @@ public:
       break;
 
       case NeoPixelType_Grbw:
-      #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
+      #if defined(USE_SERIAL)
+        _pGrbw = new NeoPixelBrightnessBus<PIXELFEATURE4,PIXELMETHOD>(countPixels);
+      #elif defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
         _pGrbw = new NeoPixelBrightnessBus<PIXELFEATURE4,PIXELMETHOD>(countPixels, CLKPIN, DATAPIN);
       #else
         _pGrbw = new NeoPixelBrightnessBus<PIXELFEATURE4,PIXELMETHOD>(countPixels, LEDPIN);
@@ -278,7 +285,7 @@ public:
       }
       break;
       case NeoPixelType_Grbw: {
-        #if defined(USE_LPD8806) || defined(USE_WS2801)
+        #if defined(USE_LPD8806) || defined(USE_WS2801) || defined(USE_SERIAL)
         _pGrbw->SetPixelColor(indexPixel, RgbColor(color.R,color.G,color.B));
         #else
         _pGrbw->SetPixelColor(indexPixel, color);
