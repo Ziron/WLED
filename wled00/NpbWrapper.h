@@ -102,7 +102,9 @@
  #endif
 #else //esp8266
  //autoselect the right method depending on strip pin
- #ifdef USE_APA102
+ #ifdef USE_SERIAL
+  #define PIXELMETHOD RgbSerialMethod
+ #elif USE_APA102
   #define PIXELMETHOD DotStarMethod
  #elif defined(USE_WS2801)
   #define PIXELMETHOD NeoWs2801Method
