@@ -16,7 +16,7 @@ public:
     }
 
 
-    bool IsReadyToUpdate()
+    bool IsReadyToUpdate() const
     {
       uint32_t delta = micros() - _endTime;
       return (delta >= 10000); // Max 100 Hz
